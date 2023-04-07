@@ -12,19 +12,6 @@ resource "kubernetes_namespace" "skyfarm" {
   }
 }
 
-resource "kubernetes_config_map" "skyfarm-config" {
-  metadata {
-    name      = "skyfarm-config"
-    namespace = kubernetes_namespace.skyfarm.metadata[0].name
-  }
-  data = {
-    "SERVER_PORT" : "27015",
-    "MONGO_URL" : "mongodb://admin:admin@172.17.0.12:27017/?authMechanism=SCRAM-SHA-256",
-    "DB_NAME" : "Kubernetes",
-    "DB_COLLECTION" : "Workspases"
-  }
-}
-
 resource "kubernetes_secret" "mongo-credentials" {
   metadata {
     name      = "mongo-credentials"
