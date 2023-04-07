@@ -7,16 +7,6 @@ terraform {
   }
 }
 
-variable "MONGO_INITDB_ROOT_USERNAME" {
-  type        = string
-  description = "This is an example input variable using env variables."
-  default     = "admin"
-}
-variable "MONGO_INITDB_ROOT_PASSWORD" {
-  type        = string
-  description = "This is an example input variable using env variables."
-  default     = "admin"
-}
 provider "docker" {}
 resource "docker_image" "mongo" {
   name = "mongo:latest"
