@@ -12,6 +12,10 @@ resource "docker_image" "mongo" {
   name = "mongo:latest"
 }
 
+resource "docker_image" "skyfarm" {
+  name = "klutrem/skyfarm:latest"
+}
+
 resource "docker_container" "mongo" {
   image = docker_image.mongo.image_id
   name  = "mongodb"
@@ -20,5 +24,15 @@ resource "docker_container" "mongo" {
   ports {
     internal = 27017
     external = 6000
+  }
+}
+
+resource "docker_container" "skyfarm" {
+  image = docker_image.skyfarm.image_id
+  name  = "skyfarm"
+  env   = ["MONGO_URL=mongodb://admin:admin@localhost:6000", "SERVER_PORT=3000"]
+  ports {
+    internal = 3000
+    external = 3000
   }
 }
