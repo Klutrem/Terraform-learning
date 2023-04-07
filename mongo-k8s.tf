@@ -63,7 +63,10 @@ resource "kubernetes_pod" "mongo" {
   metadata {
     name      = "mongo"
     namespace = "skyfarm"
-    labels    = { "kubernetes.io/hostname" : "minikube" }
+    labels = {
+      "kubernetes.io/hostname" : "minikube",
+      "kubernetes.io/name" : "mongodb"
+    }
 
   }
   spec {
@@ -83,6 +86,22 @@ resource "kubernetes_pod" "mongo" {
     }
     volume {
       name = kubernetes_persistent_volume_claim.mongo-pvc.metadata[0].name
+
     }
   }
+}
+
+resource "kubernetes_service" "mongo-ip" {
+  metadata {
+    name      = "mongo-ip"
+    namespace = kubernetes_namespace.skyfarm.metadata[0].name
+  }
+  spec {
+    selector = { "kubernetes.io/name" : "mongodb" }
+    port {
+      port        = 27017
+      target_port = 27017
+    }
+  }
+
 }

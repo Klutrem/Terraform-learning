@@ -5,7 +5,8 @@ resource "kubernetes_config_map" "skyfarm-config" {
   }
   data = {
     "SERVER_PORT" : "3000",
-    "MONGO_URL" : "mongodb+srv://user:admin@pozhiloy.qaqey6i.mongodb.net/?retryWrites=true&w=majority&authSource=admin",
+
+    "MONGO_URL" : "mongodb://admin:admin@${kubernetes_service.mongo-ip.spec[0].cluster_ip}:27017",
     "DB_NAME" : "Kubernetes",
     "DB_COLLECTION" : "Workspases"
   }
