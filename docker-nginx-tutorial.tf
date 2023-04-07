@@ -8,17 +8,17 @@ terraform {
 }
 
 provider "docker" {}
-
-resource "docker_image" "nginx" {
-  name = "nginx:latest"
+resource "docker_image" "mongo" {
+  name = "mongo:latest"
 }
 
-resource "docker_container" "nginx" {
-  image = docker_image.nginx.image_id
-  name  = "tutorial"
+resource "docker_container" "mongo" {
+  image = docker_image.mongo.image_id
+  name  = "mongodb"
+  env   = ["MONGO_INITDB_ROOT_PASSWORD=admin", "MONGO_INITDB_ROOT_USERNAME=admin"]
 
   ports {
-    internal = 80
-    external = 8000
+    internal = 27017
+    external = 6000
   }
 }
