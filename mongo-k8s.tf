@@ -3,7 +3,7 @@ terraform {
 }
 
 provider "kubernetes" {
-  config_path = "~/.kube/config"
+  config_path = "./kube.conf"
 }
 
 resource "kubernetes_namespace" "skyfarm" {
