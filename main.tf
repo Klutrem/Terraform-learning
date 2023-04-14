@@ -9,14 +9,15 @@ terraform {
       version = ">= 2.19.0"
     }
     helm = {
-      source = "hashicorp/helm"
+      source  = "hashicorp/helm"
+      version = "~> 2.7.0"
     }
   }
 }
 
-provider "helm" {
-  kubernetes {
-    config_path = "./kube.conf"
+resource "kubernetes_namespace" "skyfarm" {
+  metadata {
+    name = var.namespace
   }
 }
 

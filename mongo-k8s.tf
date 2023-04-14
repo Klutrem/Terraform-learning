@@ -6,16 +6,11 @@ provider "kubernetes" {
   config_path = "./kube.conf"
 }
 
-resource "kubernetes_namespace" "skyfarm" {
-  metadata {
-    name = "skyfarm"
-  }
-}
 
 resource "kubernetes_secret" "mongo-credentials" {
   metadata {
     name      = "mongo-credentials"
-    namespace = kubernetes_namespace.skyfarm.metadata[0].name
+    namespace = var.namespace
   }
   data = {
     "MONGO_INITDB_ROOT_USERNAME" = "admin"
@@ -26,7 +21,7 @@ resource "kubernetes_secret" "mongo-credentials" {
 resource "kubernetes_persistent_volume_claim" "mongo-pvc" {
   metadata {
     name      = "mongo-pvc"
-    namespace = kubernetes_namespace.skyfarm.metadata[0].name
+    namespace = var.namespace
   }
   spec {
     access_modes = ["ReadWriteOnce"]
@@ -94,7 +89,7 @@ resource "kubernetes_pod" "mongo" {
 resource "kubernetes_service" "mongo-ip" {
   metadata {
     name      = "mongo-ip"
-    namespace = kubernetes_namespace.skyfarm.metadata[0].name
+    namespace = var.namespace
   }
   spec {
     selector = { "kubernetes.io/name" : "mongodb" }
