@@ -59,13 +59,11 @@ resource "kubernetes_pod" "mongo" {
     name      = "mongo"
     namespace = "skyfarm"
     labels = {
-      "kubernetes.io/hostname" : "minikube",
       "kubernetes.io/name" : "mongodb"
     }
 
   }
   spec {
-    node_name = "minikube"
     container {
       name  = "mongo"
       image = "mongo"

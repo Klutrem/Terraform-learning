@@ -18,10 +18,9 @@ resource "kubernetes_pod" "skyfarm-backend" {
   metadata {
     name      = "skyfarm-backend"
     namespace = var.namespace
-    labels    = { "kubernetes.io/hostname" : "minikube" }
+    labels    = { "kubernetes.io/appname" : "skyfarm" }
   }
   spec {
-    node_name = "minikube"
     container {
       name              = "skyfarm-backend"
       image             = "klutrem/skyfarm:jwt"
