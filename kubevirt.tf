@@ -23,7 +23,7 @@ resource "kubernetes_secret" "kubevirt-credentials" {
 
 
 
-resource "kubernetes_service" "mongo-ip" {
+resource "kubernetes_service" "lb" {
   metadata {
     name      = "lb"
     namespace = var.namespace
