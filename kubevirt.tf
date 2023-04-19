@@ -3,24 +3,6 @@ provider "kubevirt" {
   config_path = "./kube.conf"
 }
 
-resource "kubernetes_secret" "kubevirt-credentials" {
-  metadata {
-    name      = "kubevirt-credentials"
-    namespace = var.namespace
-  }
-  data = {
-    user_data = <<-EOF
-                        #cloud-config
-                        name: klutrem
-                        password: pass
-                        ssh_authorized_keys: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCtutLqMD/XKAUaWoMfegrsslUqyBz+qvBSDhi0aj3NlzydiKe+RZfMXRwoR42NxuvqxTChUZj1+kBPWigUJHflM4pWaIIXhhVyx7sQm2FsEylEmgLKTHHpb2mu+lq7Fjx8d1RFV/zUmvEXB9MqCm4N99jSu289lhnjbpuacJC12zAgiljvc7rVYuSDJZC6Cshd0pbFovUxPHgFzgrXIHFDOgYaQfToJDvUs2+n9tKFjXLnM8Uj2+TkfAa18pi463PtJ4HTX65M16E+zToAzPs6JIEzAaLSqFK46qDQJx6W/2IWDWfLysqzK7wfA+KJgu9q5omp9+NdD6C8z9Y5IdnpJxuCOU3ICB9KKNE/hucGRL5PBDD1aik7zoIO1OTOon79jSBWC5uJ1les8gt6SQunVwPeIlETVohYRhbyhoeOUYcpTaNpQbhyJjVE7qpgKKcTYC9wx7LUA16eJF9V+PnpZl3i43sJiluX49G8F8CtUpR+nTIbue1uRvo1o9t7Osk= klutrem@Klutrem"
-                        chpasswd: false
-                        lock_passwd: false
-                        EOF
-
-  }
-}
-
 
 
 resource "kubernetes_service" "lb" {
@@ -34,7 +16,7 @@ resource "kubernetes_service" "lb" {
       port        = 22
       target_port = 22
     }
-    type = "LoadBalancer"
+    type = "NodePort"
   }
 }
 
@@ -42,6 +24,9 @@ resource "kubevirt_virtual_machine" "vmt" {
   metadata {
     name      = "vmt"
     namespace = var.namespace
+    labels = {
+      "kubernetes.io/hostname" : "skyfarm"
+    }
   }
   spec {
     data_volume_templates {
@@ -116,14 +101,7 @@ resource "kubevirt_virtual_machine" "vmt" {
           name = "cloudinitdisk"
           volume_source {
             cloud_init_config_drive {
-              user_data = <<-EOF
-              #cloud-config
-              name:klutrem
-              password:pass
-              ssh_authorized_keys:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCtutLqMD/XKAUaWoMfegrsslUqyBz+qvBSDhi0aj3NlzydiKe+RZfMXRwoR42NxuvqxTChUZj1+kBPWigUJHflM4pWaIIXhhVyx7sQm2FsEylEmgLKTHHpb2mu+lq7Fjx8d1RFV/zUmvEXB9MqCm4N99jSu289lhnjbpuacJC12zAgiljvc7rVYuSDJZC6Cshd0pbFovUxPHgFzgrXIHFDOgYaQfToJDvUs2+n9tKFjXLnM8Uj2+TkfAa18pi463PtJ4HTX65M16E+zToAzPs6JIEzAaLSqFK46qDQJx6W/2IWDWfLysqzK7wfA+KJgu9q5omp9+NdD6C8z9Y5IdnpJxuCOU3ICB9KKNE/hucGRL5PBDD1aik7zoIO1OTOon79jSBWC5uJ1les8gt6SQunVwPeIlETVohYRhbyhoeOUYcpTaNpQbhyJjVE7qpgKKcTYC9wx7LUA16eJF9V+PnpZl3i43sJiluX49G8F8CtUpR+nTIbue1uRvo1o9t7Osk= klutrem@Klutrem"
-              chpasswd:false
-              lock_passwd:false
-              EOF
+              user_data_base64 = "I2Nsb3VkLWNvbmZpZwogICAgICAgICAgICB1c2VyczoKICAgICAgICAgICAgLSBjaHBhc3N3ZDoKICAgICAgICAgICAgICAgIGV4cGlyZTogZmFsc2UKICAgICAgICAgICAgICBncm91cHM6IHVzZXJzLCBhZG1pbgogICAgICAgICAgICAgIGxvY2tfcGFzc3dkOiBmYWxzZQogICAgICAgICAgICAgIG5hbWU6IGtsdXRyZW0KICAgICAgICAgICAgICBzc2hfYXV0aG9yaXplZF9rZXlzOgogICAgICAgICAgICAgIC0gc3NoLXJzYSBBQUFBQjNOemFDMXljMkVBQUFBREFRQUJBQUFCZ1FESURIRkExVjNpZkFhOTJJYm5XWWdBTmxGVXhzT2orRUV0eWdyR3VvK2dMMXVacGlrNmR4cURRdUFoU2RqaGtNdHkrYmdTUVFvUVFIL0FuNm11REc1S2lOVHQwTU5lMW9XajkwS09kQ3VQMWs0STYvRUk3TkJNc1Jrd0FEU0xZWFNaSjF6M3J3YUZQZ3A3dHF3cHl1eEwwVlg0RlNYTGlLcEl0SFdkUEw3YnppSTdTU21CQnlZSXYzKzNBclNpMVFXQTkzTC9iUkw4NlhzRnpCdW1DSmNJdkdsV0k5TlFlU3ErR2szWGQwQnltaWx4bkN5amdZbSsvOHZIanViVVBiYmh1NDROVnJBZTJxNzdPQXk2aDlvUUNHWGF0a3hQZy9HMzVEbEJETVh5TGl1K2NraGl6S3B1Q2oxWGw2cnlVcE85enJFQ2dDTGxlUlNXT3BBd2kxSVdpM3AvKzJvQ2RlREltbmdzQlpzRkttcGQwT1BhTDNjYzJqcmx5cDVhT0RUcy9qd0tyMndoMHFNelpYMHA4ZW9KbXB0NDg3QmJkS1BOSjAybzkweDg4MmNVOVVEY25uRDl1YlFnR1NkT09tR1VWNkhLNTdBcGN5ZjJpcFJMTEdrYTc1U0tyM3hKVUVGNVpYVSt2UCtUNHdSWDJzSUtUME82MTY3K3NDcklJZ1U9CiAgICAgICAgICAgICAgICB1YnVudHVAc2t5ZmFybQogICAgICAgICAgICAgIC0gc3NoLXJzYSBBQUFBQjNOemFDMXljMkVBQUFBREFRQUJBQUFCZ1FDdHV0THFNRC9YS0FVYVdvTWZlZ3Jzc2xVcXlCeitxdkJTRGhpMGFqM05senlkaUtlK1JaZk1YUndvUjQyTnh1dnF4VENoVVpqMStrQlBXaWdVSkhmbE00cFdhSUlYaGhWeXg3c1FtMkZzRXlsRW1nTEtUSEhwYjJtdStscTdGang4ZDFSRlYvelVtdkVYQjlNcUNtNE45OWpTdTI4OWxobmpicHVhY0pDMTJ6QWdpbGp2YzdyVll1U0RKWkM2Q3NoZDBwYkZvdlV4UEhnRnpnclhJSEZET2dZYVFmVG9KRHZVczIrbjl0S0ZqWExuTThVajIrVGtmQWExOHBpNDYzUHRKNEhUWDY1TTE2RSt6VG9BelBzNkpJRXpBYUxTcUZLNDZxRFFKeDZXLzJJV0RXZkx5c3F6Szd3ZkErS0pndTlxNW9tcDkrTmRENkM4ejlZNUlkbnBKeHVDT1UzSUNCOUtLTkUvaHVjR1JMNVBCREQxYWlrN3pvSU8xT1RPb243OWpTQldDNXVKMWxlczhndDZTUXVuVndQZUlsRVRWb2hZUmhieWhvZU9VWWNwVGFOcFFiaHlKalZFN3FwZ0tLY1RZQzl3eDdMVUExNmVKRjlWK1BucFpsM2k0M3NKaWx1WDQ5RzhGOEN0VXBSK25USWJ1ZTF1UnZvMW85dDdPc2s9CiAgICAgICAgICAgICAgICBrbHV0cmVtQEtsdXRyZW0KICAgICAgICAgICAgICBzdWRvOiBBTEw9KEFMTCkgTk9QQVNTV0Q6QUxMCg=="
             }
           }
         }
