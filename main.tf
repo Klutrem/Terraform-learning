@@ -18,10 +18,39 @@ terraform {
   }
 }
 
+
+provider "helm" {
+  kubernetes {
+    config_path = "./kube.conf"
+  }
+}
+
+provider "kubernetes" {
+  config_path = "./kube.conf"
+}
+
 resource "kubernetes_namespace" "skyfarm" {
   metadata {
     name = var.namespace
   }
+}
+
+module "mongo" {
+  source = "./mongo"
+}
+
+module "skyfarm-backend" {
+  source = "./skyfarm-backend"
+}
+
+module "keycloak" {
+  source = "./keycloak"
+}
+
+module "elk-stack" {
+  source              = "./elk-stack"
+  kibana_service_type = "NodePort"
+  #elasticsearch_service_type = "NodePort"
 }
 
 # provider "docker" {}
