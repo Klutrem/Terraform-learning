@@ -1,9 +1,3 @@
-provider "helm" {
-  kubernetes {
-    config_path = "./kube.conf"
-  }
-}
-
 resource "helm_release" "keycloak" {
   name       = "keycloak"
   repository = "https://charts.bitnami.com/bitnami"

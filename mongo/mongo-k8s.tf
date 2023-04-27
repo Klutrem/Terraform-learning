@@ -2,11 +2,6 @@ terraform {
 
 }
 
-provider "kubernetes" {
-  config_path = "./kube.conf"
-}
-
-
 resource "kubernetes_secret" "mongo-credentials" {
   metadata {
     name      = "mongo-credentials"
@@ -15,6 +10,12 @@ resource "kubernetes_secret" "mongo-credentials" {
   data = {
     "MONGO_INITDB_ROOT_USERNAME" = "admin"
     "MONGO_INITDB_ROOT_PASSWORD" = "admin"
+  }
+}
+
+resource "kubernetes_namespace" "skyfarm" {
+  metadata {
+    name = "skyfarm"
   }
 }
 
