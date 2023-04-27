@@ -62,3 +62,25 @@ provider "registry.terraform.io/kreuzwerker/docker" {
     "zh:fcc9c1cea5ce85e8bcb593862e699a881bd36dffd29e2e367f82d15368659c3d",
   ]
 }
+
+provider "registry.terraform.io/kubevirt/kubevirt" {
+  version = "0.0.1"
+  hashes = [
+    "h1:Vdpp79IKppdO9qfM12NgoLWShq8kZuSEjB+SL/NH8n8=",
+    "zh:4b971c03d6d875e070d0abab8b9430c96da3ae0f28b8ed3f93bd39ac9623ef02",
+    "zh:587dc8eb7574db8837d9512e37ca3f5e1d41f3c703c26baa71455a9c62d54a34",
+    "zh:6bed96dda0c245d9e2823329f96118726028b5d0d8a45d4bbd885c6190885fb7",
+    "zh:912943e8dc3a8126374e9a6ad9bc145cd434132c519ce52afaf5fec9a12389fb",
+    "zh:94a7fd1fa83eb99fb3854e59fd23afdde6d0146be911ff5559f6c86564dda63e",
+    "zh:a0dc076f1c96104e8e8749fe812a846eac75c4cda251e79a5cf2d5f959ef98ea",
+    "zh:bc8ea684a049fa90c867e77b2b9bf12eb31f2b271affe90fd12da970f33b3867",
+    "zh:beec11f6d2a7c6f3c02f20f06957f26f842747ee1ec6ff42612cb4d6f23fb5e7",
+    "zh:c0146fed567cf2b506b968b983cbb42bc00029f928b3863b372569d61151c6a8",
+    "zh:c5cdeb8ce8351dfa6e12bca0ccf715b139d7e347c4c107264afd978b6089f2d7",
+    "zh:cbfaf08066db78d6a0f419d78b269d267e68008ac31b46cd35c0710eff53b748",
+    "zh:e2e212a972918c86f668367c184165670dd622c91fb70d4abf9064b2c21b0e71",
+    "zh:e60cd097f56de6f3c88a0be4913fb46e51619a82dbf18ece91e988f2079e8ee3",
+    "zh:ef249e444d96e5996ffe0c97a6c5e17ed2650606d2d1883e110e4475b1d3eac9",
+    "zh:f569b65999264a9416862bca5cd2a6177d94ccb0424f3a4ef424428912b9cb3c",
+  ]
+}

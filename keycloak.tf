@@ -27,7 +27,6 @@ resource "helm_release" "keycloak" {
     name  = "auth.adminUser"
     value = kubernetes_secret.keycloak1.data["KEYCLOAK_ADMIN"]
   }
-
 }
 
 resource "kubernetes_secret" "keycloak-postgresql1" {
