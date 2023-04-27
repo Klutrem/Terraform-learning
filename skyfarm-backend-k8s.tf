@@ -1,14 +1,15 @@
 resource "kubernetes_config_map" "skyfarm-config" {
   metadata {
     name      = "skyfarm-config"
-    namespace = kubernetes_namespace.skyfarm.metadata[0].name
+    namespace = var.namespace
   }
   data = {
     "SERVER_PORT" : "3000",
     "WEBSOCKET_PORT" : 12121
     "MONGO_URL" : "mongodb://admin:admin@${kubernetes_service.mongo-ip.spec[0].cluster_ip}:27017",
     "DB_NAME" : "Kubernetes",
-    "DB_COLLECTION" : "Workspases"
+    "DB_COLLECTION" : "Workspases",
+    "JWT_SECRET" : "PSdH8jmh7JT5cZ59uEm3rtuMm43KIUUe"
   }
 }
 
@@ -16,15 +17,13 @@ resource "kubernetes_config_map" "skyfarm-config" {
 resource "kubernetes_pod" "skyfarm-backend" {
   metadata {
     name      = "skyfarm-backend"
-    namespace = kubernetes_namespace.skyfarm.metadata[0].name
-    labels    = { "kubernetes.io/hostname" : "minikube" }
+    namespace = var.namespace
+    labels    = { "kubernetes.io/appname" : "skyfarm" }
   }
   spec {
-    node_name = "minikube"
-
     container {
       name              = "skyfarm-backend"
-      image             = "klutrem/skyfarm:latest"
+      image             = "klutrem/skyfarm:jwt"
       image_pull_policy = "Always"
       env_from {
         config_map_ref {
