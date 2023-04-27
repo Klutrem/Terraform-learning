@@ -95,3 +95,12 @@ resource "helm_release" "kibana" {
     value = var.elasticsearch_port
   }
 }
+
+
+resource "helm_release" "logstash" {
+  name       = "logstash"
+  namespace  = var.namespace
+  repository = "https://charts.bitnami.com/bitnami"
+  chart      = "logstash"
+  wait       = false
+}
