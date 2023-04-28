@@ -48,9 +48,9 @@ module "keycloak" {
 }
 
 module "elk-stack" {
-  source              = "./elk-stack"
-  kibana_service_type = "NodePort"
-  #elasticsearch_service_type = "NodePort"
+  source                     = "./elk-stack"
+  kibana_service_type        = "NodePort"
+  elasticsearch_service_type = "ClusterIP"
 }
 
 # provider "docker" {}
