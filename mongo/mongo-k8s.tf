@@ -96,6 +96,7 @@ resource "kubernetes_service" "mongo-ip" {
       port        = 27017
       target_port = 27017
     }
+    cluster_ip = var.mongo_ip
   }
 
 }

@@ -36,11 +36,13 @@ resource "kubernetes_namespace" "skyfarm" {
 }
 
 module "mongo" {
-  source = "./mongo"
+  source   = "./mongo"
+  mongo_ip = var.mongo_ip
 }
 
 module "skyfarm-backend" {
-  source = "./skyfarm-backend"
+  source   = "./skyfarm-backend"
+  mongo_ip = var.mongo_ip
 }
 
 module "keycloak" {

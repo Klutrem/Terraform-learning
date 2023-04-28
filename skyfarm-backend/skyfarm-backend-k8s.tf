@@ -6,7 +6,7 @@ resource "kubernetes_config_map" "skyfarm-config" {
   data = {
     "SERVER_PORT" : "3000",
     "WEBSOCKET_PORT" : 12121
-    #"MONGO_URL" : "mongodb://admin:admin@${kubernetes_service.mongo-ip.spec[0].cluster_ip}:27017",
+    "MONGO_URL" : "mongodb://admin:admin@${var.mongo_ip}:27017",
     "DB_NAME" : "Kubernetes",
     "DB_COLLECTION" : "Workspases",
     "JWT_SECRET" : "PSdH8jmh7JT5cZ59uEm3rtuMm43KIUUe"
@@ -15,6 +15,7 @@ resource "kubernetes_config_map" "skyfarm-config" {
 
 
 resource "kubernetes_pod" "skyfarm-backend" {
+  depends_on = [kubernetes_config_map.skyfarm-config]
   metadata {
     name      = "skyfarm-backend"
     namespace = var.namespace
@@ -23,7 +24,7 @@ resource "kubernetes_pod" "skyfarm-backend" {
   spec {
     container {
       name              = "skyfarm-backend"
-      image             = "klutrem/skyfarm:jwt"
+      image             = "klutrem/skyfarm:latest"
       image_pull_policy = "Always"
       env_from {
         config_map_ref {
