@@ -11,7 +11,7 @@ resource "helm_release" "elasticsearch" {
   chart      = "elasticsearch"
   values     = [file(var.elasticsearch_values_path)]
   wait       = false
-  version    = "19.6.0"
+  version    = var.elasticsearch_version
 
   set {
     name  = "master.heapSize"
@@ -73,7 +73,7 @@ resource "helm_release" "kibana" {
   repository = "https://charts.bitnami.com/bitnami"
   chart      = "kibana"
   wait       = false
-  version    = "10.2.17"
+  version    = var.kibana_version
 
   set {
     name  = "persistence.size"
@@ -103,4 +103,30 @@ resource "helm_release" "logstash" {
   repository = "https://charts.bitnami.com/bitnami"
   chart      = "logstash"
   wait       = false
+
+  set {
+    name  = "persistence.size"
+    value = var.logstash_storage
+  }
+
+  set {
+    name  = "service.clusterIP"
+    value = var.logstash_host
+  }
+
+  set {
+    name  = "extraEnvVarsCM"
+    value = var.logstash_configmap
+  }
+}
+
+
+resource "kubernetes_config_map" "logstash_configmap" {
+  metadata {
+    name      = var.logstash_configmap
+    namespace = var.namespace
+  }
+  data = {
+    "ELASTICSEARCH_HOST" = var.elasticsearch_host
+  }
 }
