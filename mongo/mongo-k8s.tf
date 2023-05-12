@@ -13,11 +13,11 @@ resource "kubernetes_secret" "mongo-credentials" {
   }
 }
 
-resource "kubernetes_namespace" "skyfarm" {
-  metadata {
-    name = "skyfarm"
-  }
-}
+# resource "kubernetes_namespace" "skyfarm" {
+#   metadata {
+#     name = "skyfarm"
+#   }
+# }
 
 resource "kubernetes_persistent_volume_claim" "mongo-pvc" {
   metadata {

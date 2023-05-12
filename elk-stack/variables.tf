@@ -61,6 +61,11 @@ variable "logstash_host" {
   default = "10.105.170.43"
 }
 
+variable "logstash_port" {
+  type    = string
+  default = "8080"
+}
+
 variable "logstash_configmap" {
   type    = string
   default = "logstash-cm"
@@ -69,4 +74,14 @@ variable "logstash_configmap" {
 variable "kibana_version" {
   type    = string
   default = "10.2.17"
+}
+
+variable "logstash_log_host" {
+  type    = string
+  default = "127.0.0.1"
+}
+
+variable "beats_port" {
+  type    = string
+  default = "5555"
 }

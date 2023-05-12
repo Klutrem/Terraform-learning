@@ -24,7 +24,7 @@ resource "kubernetes_pod" "skyfarm-backend" {
   spec {
     container {
       name              = "skyfarm-backend"
-      image             = "klutrem/skyfarm:latest"
+      image             = "klutrem/skyfarm:salar"
       image_pull_policy = "Always"
       env_from {
         config_map_ref {
@@ -39,6 +39,20 @@ resource "kubernetes_pod" "skyfarm-backend" {
         host_port      = 12121
         container_port = 12121
       }
+    }
+  }
+}
+
+resource "kubernetes_service" "skyfarm-ip" {
+  metadata {
+    name      = "skyfarm"
+    namespace = var.namespace
+  }
+  spec {
+    selector = { "kubernetes.io/appname" : "skyfarm" }
+    port {
+      port        = 3000
+      target_port = 3000
     }
   }
 }
