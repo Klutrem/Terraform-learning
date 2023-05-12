@@ -53,6 +53,7 @@ module "elk-stack" {
   source                     = "./elk-stack"
   kibana_service_type        = "NodePort"
   elasticsearch_service_type = "ClusterIP"
+  logstash_log_host          = var.skyfarm_host
 }
 
 # provider "docker" {}

@@ -1,9 +1,10 @@
 resource "helm_release" "keycloak" {
   name       = "keycloak"
-  repository = "https://charts.bitnami.com/bitnami"
+  repository = "bitnami"
   chart      = "keycloak"
   wait       = false
   namespace  = var.namespace
+  version    = "13.0.1"
 
   set {
     name  = "postgresql.auth.postgresPassword"
