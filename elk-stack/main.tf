@@ -103,6 +103,7 @@ resource "helm_release" "logstash" {
   repository = "https://charts.bitnami.com/bitnami"
   chart      = "logstash"
   wait       = false
+  values     = [file(var.logstash_values_path)]
 
   set {
     name  = "persistence.size"
@@ -155,7 +156,7 @@ resource "kubernetes_config_map" "logstash_configmap" {
     "skyfarm.conf" : <<-EOT
     input {
       beats {
-        port => 8080
+        port => 5555
       }
     }  
 
@@ -234,6 +235,7 @@ resource "kubernetes_config_map" "filebeat-cm" {
         filebeat.autodiscover:
           providers:
             - type: kubernetes
+              enabled: true
               templates:
                 - condition:
                     equals:
@@ -243,7 +245,7 @@ resource "kubernetes_config_map" "filebeat-cm" {
                       paths: 
                         - /var/log/containers/*-$${data.kubernetes.container.id}.log        
         output.logstash:
-          hosts: ["${var.logstash_host}:8080"]
+          hosts: ["${var.logstash_host}:5555"]
     EOT
   }
 }
