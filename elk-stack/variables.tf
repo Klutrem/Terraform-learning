@@ -81,6 +81,11 @@ variable "logstash_log_host" {
   default = "127.0.0.1"
 }
 
+variable "logstash_values_path" {
+  type    = string
+  default = "elk-stack/logstash_values.yaml"
+}
+
 variable "beats_port" {
   type    = string
   default = "5555"
