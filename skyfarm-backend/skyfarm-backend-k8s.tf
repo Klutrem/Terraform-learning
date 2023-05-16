@@ -19,7 +19,8 @@ resource "kubernetes_pod" "skyfarm-backend" {
   metadata {
     name      = "skyfarm-backend"
     namespace = var.namespace
-    labels    = { "kubernetes.io/appname" : "skyfarm" }
+    labels = { "kubernetes.io/appname" : "skyfarm"
+    "app" : "skyfarm" }
   }
   spec {
     container {

@@ -263,46 +263,43 @@ resource "kubernetes_config_map" "filebeat-cm" {
         filebeat.config.modules:
           path: $${path.config}/modules.d/*.yml
           reload.enabled: false
-        processors:
-          - add_cloud_metadata:
-          - add_host_metadata:
-          - add_kubernetes_metadata: ~
-        # filebeat.inputs:
-        #   - type: container
-        #     id: skyfarm
-        #     stream: stdout
-        #     paths:
-        #       - /var/log/containers/*.log
-        #     processors:
-        #     - add_kubernetes_metadata:
-        #         in_cluster: true
+
         filebeat.autodiscover:
           providers:
             - type: kubernetes
-              enabled: true
-              include_labels: ["app"]
-              templates:
-                - condition:
-                    equals:
-                      kubernetes.namespace: ${var.namespace}
-                  config:
-                    - type: container
-                      paths: 
-                        - /var/log/containers/*-$${data.kubernetes.container.id}.log  
-        # filebeat.autodiscover:
-        #   providers:
-        #   - type: kubernetes
-        #     node: $${NODE_NAME}
-        #     hints.enabled: true
-        #     hints.default_config:
-        #       type: container
-        #       paths:
-        #         - /var/log/containers/*.log      
-        output.logstash:
-          hosts: ["logstash:5044"]
-        # output.elasticsearch:
-        #   hosts: ["elasticsearch:9200"]
-        #   index: "%%{[kubernetes.namespace]:filebeat}-%%{[beat.version]}-%%{+yyyy.MM.dd}"
+              node: $${NODE_NAME}
+              hints.enabled: true
+              hints.default_config:
+                type: container
+                paths:
+                  - /var/log/containers/*$${data.kubernetes.container.id}.log 
+        processors:
+            - add_cloud_metadata:
+            - add_host_metadata:
+            - add_kubernetes_metadata:
+            - add_fields:
+                when:
+                  contains:
+                    app: "skyfarm"
+                target: ''
+                fields:
+                  event:
+                    dataset: skyfarm.log
+            - add_fields:
+                when:
+                  contains:
+                    app: "mongo"
+                target: ''
+                fields:
+                  event:
+                    dataset: mongo.log
+        # output.logstash:
+        #   hosts: ["logstash:5044"]
+        setup.dashboards.enabled: true
+        output.elasticsearch:
+          hosts: ["elasticsearch:9200"]
+        setup.kibana:
+          host: "kibana:5601"
     EOT
   }
 }

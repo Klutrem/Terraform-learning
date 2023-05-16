@@ -61,6 +61,7 @@ resource "kubernetes_pod" "mongo" {
     namespace = "skyfarm"
     labels = {
       "kubernetes.io/name" : "mongodb"
+      "app" : "mongo"
     }
 
   }
