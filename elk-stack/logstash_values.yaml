@@ -418,10 +418,6 @@ service:
   ## @param service.ports [array] Logstash service ports (evaluated as a template)
   ##
   ports:
-    - name: http
-      port: 8080
-      targetPort: http
-      protocol: TCP
     - name: beat
       port: 5044
       targetPort: 5044
