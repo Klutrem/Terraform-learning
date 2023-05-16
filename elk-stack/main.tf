@@ -104,6 +104,7 @@ resource "helm_release" "logstash" {
   chart      = "logstash"
   wait       = false
   values     = [file(var.logstash_values_path)]
+  version    = var.logstash_version
 
   set {
     name  = "persistence.size"
@@ -156,14 +157,30 @@ resource "kubernetes_config_map" "logstash_configmap" {
     "skyfarm.conf" : <<-EOT
     input {
       beats {
-        port => 5555
+        port => 5044
       }
-    }  
+    }
 
-    output{ 
-      elasticsearch {
-        hosts => ["elasticsearch:9200"]
-        index => "skyfarm"
+    output {
+      if [@metadata][pipeline] {
+        elasticsearch {
+          hosts => "elasticsearch:9200"
+          manage_template => false
+          index => "popa" 
+          action => "create" 
+          pipeline => "%%{[@metadata][pipeline]}" 
+          user => "elastic"
+          password => "secret"
+        }
+      } else {
+        elasticsearch {
+          hosts => "elasticsearch:9200"
+          manage_template => false
+          index => "huy" 
+          action => "create"
+          user => "elastic"
+          password => "secret"
+        }
       }
     }
   EOT
@@ -211,6 +228,25 @@ resource "kubernetes_persistent_volume_claim" "log-pvc" {
   }
 }
 
+resource "kubernetes_config_map" "filebeat-logstash" {
+  metadata {
+    name      = "filebeat-logstash"
+    namespace = var.namespace
+  }
+  data = {
+    "logstash.yml" : <<-EOT
+      - module: logstash
+        log:
+          enabled: true
+          var.paths: ["/var/log/logstash.log*"]
+        slowlog:
+          enabled: true
+          var.paths: ["/var/log/logstash-slowlog.log*"]
+
+    EOT
+  }
+}
+
 resource "kubernetes_config_map" "filebeat-cm" {
   metadata {
     name      = "filebeat-cm"
@@ -222,13 +258,21 @@ resource "kubernetes_config_map" "filebeat-cm" {
     "BEATS_PORT"         = var.beats_port
     "ELASTICSEARCH_HOST" = var.elasticsearch_host
     "ELASTICSEARCH_PORT" = var.elasticsearch_port
+    "setup.ilm.enabled" : true
     "filebeat.yml" : <<-EOT
+        filebeat.config.modules:
+          path: $${path.config}/modules.d/*.yml
+          reload.enabled: false
+        processors:
+          - add_cloud_metadata:
+          - add_host_metadata:
+          - add_kubernetes_metadata: ~
         # filebeat.inputs:
         #   - type: container
         #     id: skyfarm
         #     stream: stdout
         #     paths:
-        #       - /var/log/pods/skyfarm_skyfarm-backend_fd7621ca-6075-4a11-a894-d7acf2b113a7/skyfarm-backend/*.log
+        #       - /var/log/containers/*.log
         #     processors:
         #     - add_kubernetes_metadata:
         #         in_cluster: true
@@ -236,6 +280,7 @@ resource "kubernetes_config_map" "filebeat-cm" {
           providers:
             - type: kubernetes
               enabled: true
+              include_labels: ["app"]
               templates:
                 - condition:
                     equals:
@@ -243,9 +288,21 @@ resource "kubernetes_config_map" "filebeat-cm" {
                   config:
                     - type: container
                       paths: 
-                        - /var/log/containers/*-$${data.kubernetes.container.id}.log        
+                        - /var/log/containers/*-$${data.kubernetes.container.id}.log  
+        # filebeat.autodiscover:
+        #   providers:
+        #   - type: kubernetes
+        #     node: $${NODE_NAME}
+        #     hints.enabled: true
+        #     hints.default_config:
+        #       type: container
+        #       paths:
+        #         - /var/log/containers/*.log      
         output.logstash:
-          hosts: ["${var.logstash_host}:5555"]
+          hosts: ["logstash:5044"]
+        # output.elasticsearch:
+        #   hosts: ["elasticsearch:9200"]
+        #   index: "%%{[kubernetes.namespace]:filebeat}-%%{[beat.version]}-%%{+yyyy.MM.dd}"
     EOT
   }
 }
@@ -317,7 +374,14 @@ resource "kubernetes_daemonset" "filebeat" {
         service_account_name = "filebeat-service-account"
         container {
           name  = "filebeat"
-          image = "devopshobbies/filebeat:8.7.0"
+          image = "devopshobbies/filebeat:8.6.2"
+          # lifecycle {
+          #   post_start {
+          #     exec {
+          #       command = ["filebeat setup --index-management -E output.logstash.enabled=false -E 'output.elasticsearch.hosts=[\"elasticsearch:9200\"]'"]
+          #     }
+          #   }
+          # }
           env {
             name = "LOGSTASH_HOST"
             value_from {
@@ -382,6 +446,18 @@ resource "kubernetes_daemonset" "filebeat" {
           }
           args = ["-c", "/usr/share/filebeat/filebeat.yml",
           "-e", ]
+          volume_mount {
+            name       = "logstash"
+            mount_path = "/usr/share/filebeat/modules.d/logstash.yml"
+            sub_path   = "logstash.yml"
+          }
+        }
+
+        volume {
+          name = "logstash"
+          config_map {
+            name = "filebeat-logstash"
+          }
         }
         volume {
           name = "log-pvc"

@@ -423,8 +423,8 @@ service:
       targetPort: http
       protocol: TCP
     - name: beat
-      port: 5555
-      targetPort: 5555
+      port: 5044
+      targetPort: 5044
       protocol: TCP
     ## - name: syslog-tcp
     ##   port: 1514
