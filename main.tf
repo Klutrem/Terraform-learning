@@ -33,7 +33,7 @@ provider "kubernetes" {
 
 
 resource "helm_release" "redis" {
-  name       = "huesos"
+  name       = "redis"
   repository = "https://charts.bitnami.com/bitnami"
   chart      = "redis"
   version    = "18.1.3"
@@ -48,7 +48,7 @@ resource "helm_release" "redis" {
 
 
 resource "helm_release" "kafka" {
-  name       = "kakafka"
+  name       = "kafka"
   repository = "https://charts.bitnami.com/bitnami"
   chart      = "kafka"
   version    = "22.1.3"

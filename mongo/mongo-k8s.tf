@@ -53,7 +53,7 @@ resource "kubernetes_persistent_volume" "mongo-pv" {
 
 resource "kubernetes_deployment" "mongo" {
   metadata {
-    name      = "chmongo"
+    name      = "mongo"
     namespace = var.namespace
     labels    = var.label
 
