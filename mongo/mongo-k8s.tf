@@ -8,16 +8,12 @@ resource "kubernetes_secret" "mongo-credentials" {
     namespace = var.namespace
   }
   data = {
-    "MONGO_INITDB_ROOT_USERNAME" = "admin"
-    "MONGO_INITDB_ROOT_PASSWORD" = "admin"
+    "MONGO_INITDB_ROOT_USERNAME" = var.name
+    "MONGO_INITDB_ROOT_PASSWORD" = var.password
   }
 }
 
-# resource "kubernetes_namespace" "skyfarm" {
-#   metadata {
-#     name = "skyfarm"
-#   }
-# }
+
 
 resource "kubernetes_persistent_volume_claim" "mongo-pvc" {
   metadata {
@@ -55,32 +51,44 @@ resource "kubernetes_persistent_volume" "mongo-pv" {
   }
 }
 
-resource "kubernetes_pod" "mongo" {
+resource "kubernetes_deployment" "mongo" {
   metadata {
-    name      = "mongo"
-    namespace = "skyfarm"
-    labels = {
-      "kubernetes.io/name" : "mongodb"
-      "app" : "mongo"
-    }
+    name      = "chmongo"
+    namespace = var.namespace
+    labels    = var.label
 
   }
+
   spec {
-    container {
-      name  = "mongo"
-      image = "mongo"
-      env_from {
-        secret_ref {
-          name = kubernetes_secret.mongo-credentials.metadata[0].name
+    selector {
+      match_labels = var.label
+    }
+    template {
+      metadata {
+
+        labels = var.label
+
+      }
+
+      spec {
+        container {
+          name  = "mongodb"
+          image = "mongo"
+          env_from {
+            secret_ref {
+              name = kubernetes_secret.mongo-credentials.metadata[0].name
+            }
+          }
+          port {
+
+            container_port = var.port
+          }
+        }
+        volume {
+          name = kubernetes_persistent_volume_claim.mongo-pvc.metadata[0].name
+
         }
       }
-      port {
-        host_port      = 27017
-        container_port = 27017
-      }
-    }
-    volume {
-      name = kubernetes_persistent_volume_claim.mongo-pvc.metadata[0].name
 
     }
   }
@@ -92,12 +100,12 @@ resource "kubernetes_service" "mongo-ip" {
     namespace = var.namespace
   }
   spec {
-    selector = { "kubernetes.io/name" : "mongodb" }
+    selector = var.label
     port {
-      port        = 27017
-      target_port = 27017
+      port        = var.port
+      target_port = var.port
     }
-    cluster_ip = var.mongo_ip
   }
 
 }
+
