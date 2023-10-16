@@ -8,41 +8,19 @@ resource "helm_release" "keycloak" {
 
   set {
     name  = "postgresql.auth.postgresPassword"
-    value = kubernetes_secret.keycloak-postgresql1.data["POSTGRES_POSTGRES_PASSWORD"]
+    value = var.establish_connection_password
   }
   set {
     name  = "postgresql.auth.password"
-    value = kubernetes_secret.keycloak-postgresql1.data["POSTGRES_PASSWORD"]
+    value = var.postgres_password
   }
   set {
     name  = "auth.adminPassword"
-    value = kubernetes_secret.keycloak1.data["KEYCLOAK_ADMIN_PASSWORD"]
+    value = var.admin_password
   }
   set {
     name  = "auth.adminUser"
-    value = kubernetes_secret.keycloak1.data["KEYCLOAK_ADMIN"]
+    value = var.admin_name
   }
 }
 
-resource "kubernetes_secret" "keycloak-postgresql1" {
-  metadata {
-    name      = "keycloak-postgresql1"
-    namespace = var.namespace
-  }
-  data = {
-    POSTGRES_POSTGRES_PASSWORD = "admin"
-    POSTGRES_PASSWORD          = "admin"
-  }
-}
-
-resource "kubernetes_secret" "keycloak1" {
-  metadata {
-    name      = "keycloak1"
-    namespace = var.namespace
-  }
-  data = {
-    KEYCLOAK_ADMIN_PASSWORD    = "admin"
-    KEYCLOAK_DATABASE_PASSWORD = "admin"
-    KEYCLOAK_ADMIN             = "user"
-  }
-}
